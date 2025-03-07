@@ -10,6 +10,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import Alignment, Border, Side
 from flask_cors import CORS 
 from dotenv import load_dotenv
+import traceback
 
 load_dotenv()
 
@@ -40,73 +41,64 @@ def gerar_csv():
         if not data_inicio or not data_fim:
             return jsonify({'erro': 'Data Início ou Data Fim não inseridos.'})
         
-        query = """
-            SELECT
-                ACTION_CARD_ID AS BS_CARD_ID,
-                CARD_CREATION_DATE,
-                CARD_NAME,
-                CARD_ID_SHORT,
-                MAX(ACTION_DATE) AS CONCLUSION_DATE
-            FROM
-                ACTIONS
-            INNER JOIN
-                CARDS ON CARD_ID = ACTION_CARD_ID
-            WHERE
-                ACTION_LIST_AFTER IN (
-                    SELECT
-                        RULES_TRELLO_OBJECT_ID
-                    FROM
-                        RULES
-                    WHERE
-                        RULES_KEY = 'doneList'
-                        AND RULES_ACTIVE = 1
-                )
-                AND ACTION_DATE BETWEEN '""" + data_inicio + """' AND '""" + data_fim + """'
-            GROUP BY
-                ACTION_CARD_ID
 
-            UNION ALL
+        # query = f"""
+        #         SELECT
+        #             ACTION_CARD_ID cardId,
+        #             CARD_CREATION_DATE,
+        #             CARD_NAME,
+        #             CARD_ID_SHORT,
+        #             MAX(ACTION_DATE) AS CONCLUSION_DATE
+        #         FROM
+        #             ACTIONS
+        #         INNER JOIN
+        #             CARDS ON CARD_ID = ACTION_CARD_ID
+        #         WHERE
+        #             ACTION_LIST_AFTER IN (
+        #                 SELECT RULES_TRELLO_OBJECT_ID
+        #                 FROM RULES
+        #                 WHERE RULES_KEY = 'doneList'
+        #                 AND RULES_ACTIVE = 1
+        #             )
+        #             AND ACTION_DATE BETWEEN {data_inicio} AND {data_fim}
+        #         GROUP BY
+        #             ACTION_CARD_ID
 
-            SELECT
-                ACTION_CARD_ID AS BS_CARD_ID,
-                CARD_CREATION_DATE,
-                CARD_NAME,
-                CARD_ID_SHORT,
-                MAX(ACTION_DATE) AS CONCLUSION_DATE
-            FROM
-                ACTIONS
-            INNER JOIN
-                CARDS ON CARD_ID = ACTION_CARD_ID
-            WHERE
-                ACTION_LIST_AFTER IN (
-                    SELECT
-                        RULES_TRELLO_OBJECT_ID
-                    FROM
-                        RULES
-                    WHERE
-                        RULES_KEY = 'doneList'
-                        AND RULES_ACTIVE = 0
-                )
-                AND ACTION_DATE BETWEEN '""" + data_inicio + """' AND '""" + data_fim + """'
-            GROUP BY
-                ACTION_CARD_ID;
-        """
+        #         UNION ALL
 
-        # query = f"SELECT ACTION_CARD_ID cardId, MAX(ACTION_DATE) AS CONCLUSION_DATE FROM ACTIONS WHERE ACTION_LIST_AFTER = '670d1616ad6d3d830c285c41' AND ACTION_DATE BETWEEN '"+ data_inicio + "' AND '"+ data_fim + "' GROUP BY  ACTION_CARD_ID"
+        #         SELECT
+        #             ACTION_CARD_ID cardId,
+        #             CARD_CREATION_DATE,
+        #             CARD_NAME,
+        #             CARD_ID_SHORT,
+        #             MAX(ACTION_DATE) AS CONCLUSION_DATE
+        #         FROM
+        #             ACTIONS
+        #         INNER JOIN
+        #             CARDS ON CARD_ID = ACTION_CARD_ID
+        #         WHERE
+        #             ACTION_LIST_AFTER IN (
+        #                 SELECT RULES_TRELLO_OBJECT_ID
+        #                 FROM RULES
+        #                 WHERE RULES_KEY = 'doneList'
+        #                 AND RULES_ACTIVE = 0
+        #             )
+        #             AND ACTION_DATE BETWEEN {data_inicio} AND {data_fim}
+        #         GROUP BY
+        #             ACTION_CARD_ID;
+        #     """
+
+        query = "SELECT ACTION_CARD_ID cardId, MAX(ACTION_DATE) AS CONCLUSION_DATE FROM ACTIONS WHERE ACTION_LIST_AFTER = '670d1616ad6d3d830c285c41' AND ACTION_DATE BETWEEN %s AND %s GROUP BY  ACTION_CARD_ID"
 
         print("Data Inicial: " + data_inicio)
         print("Data Final: " + data_fim)
 
         with db.engine.connect() as conexao:
-            df = pd.read_sql(query, conexao)
+            df = pd.read_sql(query, conexao, params=(data_inicio, data_fim))
 
-        data_cards = requests.get(
-            'https://api.trello.com/1/boards/62388d998a93181c0fe96d58/cards?key=ab47763a5af3b88111bbda128e1e5498&token=ffd5c4ea8ec16ae8c01258639c3dfe81f9f36adbb397ef2a5923a86a9a0c0a8b&limit=1000'
-        )
+        data_cards = requests.get(os.getenv('TRELLO_CARDS_URL'))
 
-        data_lists = requests.get(
-            'https://api.trello.com/1/boards/62388d998a93181c0fe96d58/lists?key=ab47763a5af3b88111bbda128e1e5498&token=ffd5c4ea8ec16ae8c01258639c3dfe81f9f36adbb397ef2a5923a86a9a0c0a8b'
-        )
+        data_lists = requests.get(os.getenv('TRELLO_LISTS_URL'))
 
         board_cards = data_cards.json()
         data_lists = data_lists.json()
@@ -182,7 +174,10 @@ def gerar_csv():
         return send_file(output, as_attachment=True, download_name=f"entregas_da_semana_{data_inicio}_a_{data_fim}.xlsx", mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
     except Exception as e:
+        print("Erro ao executar requisição:", str(e))
+        print(traceback.format_exc());
         return jsonify({'erro': str(e)}), 500
+
 
 @app.route('/favicon.ico')
 def favicon():
@@ -190,3 +185,4 @@ def favicon():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
