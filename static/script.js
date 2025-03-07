@@ -1,5 +1,42 @@
 const inputsArray = [document.getElementById("data-inicio"), document.getElementById("data-fim")];
 
+
+function selecao_relatorios(){
+  const btnCards = document.getElementById("btnCards");
+  const btnListas = document.getElementById("btnListas");
+  const sairButtons = document.querySelectorAll(".sair");
+
+  const relatorioCards = document.querySelector(".cards");
+  const relatorioListas = document.querySelector(".listas");
+  const box_button = document.querySelector(".box-button")
+
+  btnCards.addEventListener("click", () => {
+    relatorioCards.style.display = 'block'
+    box_button.style.display = 'none'
+  })
+
+  btnListas.addEventListener("click", () => {
+    relatorioListas.style.display = 'block'
+    box_button.style.display = 'none'
+  })
+
+  sairButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      relatorioCards.style.display = 'none'
+      relatorioListas.style.display = 'none'
+  
+      box_button.style.display = 'flex'
+    })
+  });
+
+}
+
+selecao_relatorios()
+
+
+
+
+
 function validacao_inputs() {
     for (let i = 0; i < inputsArray.length; i++) {
         const input = inputsArray[i];
@@ -122,45 +159,44 @@ function gerar_csv(data_inicio, data_fim) {
     });
 }
 
-document.getElementById("form_csv").addEventListener("submit", function(event) {
-    event.preventDefault();
+document.getElementById("form_cards").addEventListener("submit", function(event) {
+  event.preventDefault();
 
-    const data_inicio = new Date(document.getElementById("data-inicio").value);
-    const data_fim = new Date(document.getElementById("data-fim").value);
+  const data_inicio = document.getElementById("data-inicio").value;
+  const data_fim = document.getElementById("data-fim").value;
 
-    if (isNaN(data_inicio) || isNaN(data_fim)) {
-        validacao_inputs(); 
-    }
+  if (isNaN(data_inicio) || isNaN(data_fim)) {
+      validacao_inputs(); 
+  }
 
-    if (data_inicio > data_fim){
-        Toastify({
-            text: "Data de Início nao pode ser maior do que a Data Final.",
-            duration: 5000,
-            destination: "",
-            newWindow: true,
-            close: true,
-            gravity: "top", 
-            position: "right",
-            stopOnFocus: true, 
-            style: {
-              background: "linear-gradient(to right, #ff0000, #ec5353)"
-            },
-            onClick: function(){} 
-          }).showToast();
-        document.getElementById("data-inicio").style.borderColor = 'red'
-        document.getElementById("data-fim").style.borderColor = 'red'
+  if (data_inicio > data_fim) {
+      Toastify({
+          text: "Data de Início não pode ser maior do que a Data Final.",
+          duration: 5000,
+          destination: "",
+          newWindow: true,
+          close: true,
+          gravity: "top", 
+          position: "right",
+          stopOnFocus: true, 
+          style: {
+            background: "linear-gradient(to right, #ff0000, #ec5353)"
+          },
+          onClick: function(){} 
+        }).showToast();
+      document.getElementById("data-inicio").style.borderColor = 'red';
+      document.getElementById("data-fim").style.borderColor = 'red';
 
-        
-        setTimeout(function(){
-          document.getElementById("data-inicio").style.borderColor = '#bdc3c7'
-          document.getElementById("data-fim").style.borderColor = '#bdc3c7' 
-        },3000)
-        return;
-    }
+      setTimeout(function(){
+        document.getElementById("data-inicio").style.borderColor = '#bdc3c7';
+        document.getElementById("data-fim").style.borderColor = '#bdc3c7'; 
+      }, 3000);
+      return;
+  }
 
-    const data_inicio_relatorio = data_inicio.toISOString().slice(0, 10);
-    const data_fim_relatorio = data_fim.toISOString().slice(0, 10);
-
-    validacao_inputs(); 
-    gerar_csv(data_inicio_relatorio, data_fim_relatorio);
+  validacao_inputs(); 
+  gerar_csv(data_inicio, data_fim);
 });
+
+
+

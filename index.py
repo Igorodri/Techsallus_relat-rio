@@ -39,8 +39,60 @@ def gerar_csv():
 
         if not data_inicio or not data_fim:
             return jsonify({'erro': 'Data Início ou Data Fim não inseridos.'})
+        
+        query = """
+            SELECT
+                ACTION_CARD_ID AS BS_CARD_ID,
+                CARD_CREATION_DATE,
+                CARD_NAME,
+                CARD_ID_SHORT,
+                MAX(ACTION_DATE) AS CONCLUSION_DATE
+            FROM
+                ACTIONS
+            INNER JOIN
+                CARDS ON CARD_ID = ACTION_CARD_ID
+            WHERE
+                ACTION_LIST_AFTER IN (
+                    SELECT
+                        RULES_TRELLO_OBJECT_ID
+                    FROM
+                        RULES
+                    WHERE
+                        RULES_KEY = 'doneList'
+                        AND RULES_ACTIVE = 1
+                )
+                AND ACTION_DATE BETWEEN '""" + data_inicio + """' AND '""" + data_fim + """'
+            GROUP BY
+                ACTION_CARD_ID
 
-        query = f"SELECT ACTION_CARD_ID cardId, MAX(ACTION_DATE) AS CONCLUSION_DATE FROM ACTIONS WHERE ACTION_LIST_AFTER = '670d1616ad6d3d830c285c41' AND ACTION_DATE BETWEEN '"+ data_inicio + "' AND '"+ data_fim + "' GROUP BY  ACTION_CARD_ID"
+            UNION ALL
+
+            SELECT
+                ACTION_CARD_ID AS BS_CARD_ID,
+                CARD_CREATION_DATE,
+                CARD_NAME,
+                CARD_ID_SHORT,
+                MAX(ACTION_DATE) AS CONCLUSION_DATE
+            FROM
+                ACTIONS
+            INNER JOIN
+                CARDS ON CARD_ID = ACTION_CARD_ID
+            WHERE
+                ACTION_LIST_AFTER IN (
+                    SELECT
+                        RULES_TRELLO_OBJECT_ID
+                    FROM
+                        RULES
+                    WHERE
+                        RULES_KEY = 'doneList'
+                        AND RULES_ACTIVE = 0
+                )
+                AND ACTION_DATE BETWEEN '""" + data_inicio + """' AND '""" + data_fim + """'
+            GROUP BY
+                ACTION_CARD_ID;
+        """
+
+        # query = f"SELECT ACTION_CARD_ID cardId, MAX(ACTION_DATE) AS CONCLUSION_DATE FROM ACTIONS WHERE ACTION_LIST_AFTER = '670d1616ad6d3d830c285c41' AND ACTION_DATE BETWEEN '"+ data_inicio + "' AND '"+ data_fim + "' GROUP BY  ACTION_CARD_ID"
 
         print("Data Inicial: " + data_inicio)
         print("Data Final: " + data_fim)

@@ -35,7 +35,8 @@ main {
     height: 100%;
 }
 
-form {
+.cards,.listas{
+    display: none;
     background: white;
     padding: 30px;
     border-radius: 12px;
@@ -43,6 +44,58 @@ form {
     text-align: center;
     width: 100%;
     max-width: 400px;
+}
+
+.cards div,.listas div{
+    position: relative;
+}
+
+.sair{
+    position:absolute;
+    background-color: rgb(197, 91, 91);
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 100%;
+    left: 260px;
+    bottom: -15px;
+    color: white;
+    cursor: pointer;
+}
+
+.sair:hover{
+    background-color: rgb(252, 91, 91);
+}
+
+.box-button{
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: white;
+    padding: 60px;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    height: 200px;
+    max-width: 400px;
+}
+
+.box-button button{
+    width: 200px;
+    padding:10px;
+    margin-top: 10px;
+    background-color: #137dc4;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.box-button button:hover{
+    background: #4b9fd6;
 }
 
 h2 {
