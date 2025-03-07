@@ -23,7 +23,7 @@
         <div class="box-button">
             <h2>Relatórios Techsallus</h2>
             <button id="btnCards" type="button">Relatório de Cards</button>
-            <button id="btnListas" type="button">Relatório de Listas</button>
+            <button id="btnListas" type="button">Relatório Leadtime</button>
         </div>
 
         <form class="cards" id="form_cards">
@@ -32,25 +32,27 @@
             </div>
             <h2>Relatório de Cards</h2>
 
-            <label for="">Data Início</label>
-            <input type="date" name="data-inicio" id="data-inicio" max="9999-12-31">
-
-            <label for="">Data Fim</label>
-            <input type="date" name="data-fim" id="data-fim" max="9999-12-31">
-            <button class="csv" type="submit">Gerar Relatório</button>
-        </form>
-
-        <form class="listas" id="form_lista">
-            <div>
-                <button class="sair" type="button">X</button>
-            </div>
-            <h2>Relatório de Listas</h2>
-
             <label for="data-inicio">Data Início</label>
             <input type="date" name="data-inicio" id="data-inicio" max="9999-12-31">
 
             <label for="data-fim">Data Fim</label>
             <input type="date" name="data-fim" id="data-fim" max="9999-12-31">
+            
+            <button class="csv" type="submit">Gerar Relatório</button>
+        </form>
+
+        <form class="listas" id="form_lead">
+            <div>
+                <button class="sair" type="button">X</button>
+            </div>
+            <h2>Relatório Leadtime</h2>
+
+            <label for="data-inicio_lead">Data Início</label>
+            <input type="date" name="data-inicio_lead" id="data-inicio_lead" max="9999-12-31">
+
+            <label for="data-fim_lead">Data Fim</label>
+            <input type="date" name="data-fim_lead" id="data-fim_lead" max="9999-12-31">
+
             <button class="csv" type="submit">Gerar Relatório</button>
         </form>
         

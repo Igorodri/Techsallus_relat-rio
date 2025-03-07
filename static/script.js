@@ -1,4 +1,7 @@
-const inputsArray = [document.getElementById("data-inicio"), document.getElementById("data-fim")];
+const data_inicio_element = document.getElementById("data-inicio");
+const data_fim_element = document.getElementById("data-fim");
+const data_inicio_lead_element = document.getElementById("data-inicio_lead");
+const data_fim_lead_element = document.getElementById("data-fim_lead");
 
 
 function selecao_relatorios(){
@@ -34,10 +37,9 @@ function selecao_relatorios(){
 selecao_relatorios()
 
 
-
-
-
-function validacao_inputs() {
+function validacao_inputs(inicio_element, fim_element) {
+  const inputsArray = [];
+  inputsArray.append(inicio_element,fim_element)
     for (let i = 0; i < inputsArray.length; i++) {
         const input = inputsArray[i];
         if (input.value.trim() === '') {
@@ -194,9 +196,139 @@ document.getElementById("form_cards").addEventListener("submit", function(event)
       return;
   }
 
-  validacao_inputs(); 
+  validacao_inputs(data_inicio_element, data_fim_element); 
   gerar_csv(data_inicio, data_fim);
 });
+
+function gerar_leadtime(data_inicio, data_fim){
+  fetch('/leadtime', {
+    method: 'POST',
+    headers: {
+          'Content-Type': 'application/json'
+    },
+
+    body: JSON.stringify({
+      "data-inicio": data_inicio,
+      "data-fim": data_fim
+    })     
+  })
+  .then(response => {
+    if(!response.ok){
+      throw new Error("Erro ao gerar relatório de cards");
+    }else{
+      return response.blob();
+    }
+  })
+  .then(blob => {
+    Toastify({
+        text: "Gerando Relatório...",
+        duration: 5000,
+        destination: "",
+        newWindow: true,
+        close: true,
+        gravity: "top",
+        position: "right", 
+        stopOnFocus: true, 
+        style: {
+          background: "linear-gradient(to right, #00b09b, #96c93d)"
+        },
+        onClick: function(){} 
+      }).showToast();
+    console.log("Gerando relatório...");
+    for(let i =0; i < inputsArray.length; i++){
+      const input = inputsArray[i];
+      setTimeout(function(){
+        input.style.borderColor = '#bdc3c7'; 
+      },1500)
+    }
+
+    
+      setTimeout(function(){
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Relatório de Leadtime " + data_inicio + " -  "  + data_fim +  ".xlsx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        
+        Toastify({
+            text: "Relatório Baixado com Sucesso!",
+            duration: 5000,
+            destination: "",
+            newWindow: true,
+            close: true,
+            gravity: "top",
+            position: "right", 
+            stopOnFocus: true, 
+            style: {
+              background: "linear-gradient(to right, #00b09b, #96c93d)"
+            },
+            onClick: function(){} 
+          }).showToast();
+        console.log("Relatório baixado com sucesso!");
+      },1500)
+    
+  })
+  .catch(error => {
+      Toastify({
+          text: "Erro ao gerar Relatório.",
+          duration: 5000,
+          destination: "",
+          newWindow: true,
+          close: true,
+          gravity: "top", 
+          position: "right", 
+          stopOnFocus: true, 
+          style: {
+            background: "linear-gradient(to right, #ff0000, #ec5353)"
+          },
+          onClick: function(){} 
+        }).showToast();
+      console.error("Erro ao gerar relatório:", error);
+  });
+}
+
+document.getElementById("form_lead").addEventListener("submit", function(event) {
+  event.preventDefault();
+
+  const data_inicio = document.getElementById("data-inicio_lead").value;
+  const data_fim = document.getElementById("data-fim_lead").value;
+
+  if (isNaN(data_inicio) || isNaN(data_fim)) {
+    validacao_inputs();   
+  }
+
+  if (data_inicio > data_fim) {
+      Toastify({
+          text: "Data de Início não pode ser maior do que a Data Final.",
+          duration: 5000,
+          destination: "",
+          newWindow: true,
+          close: true,
+          gravity: "top", 
+          position: "right",
+          stopOnFocus: true, 
+          style: {
+            background: "linear-gradient(to right, #ff0000, #ec5353)"
+          },
+          onClick: function(){} 
+        }).showToast();
+      document.getElementById("data-inicio_lead").style.borderColor = 'red';
+      document.getElementById("data-fim_lead").style.borderColor = 'red';
+
+      setTimeout(function(){
+        document.getElementById("data-inicio_lead").style.borderColor = '#bdc3c7';
+        document.getElementById("data-fim_lead").style.borderColor = '#bdc3c7'; 
+      }, 3000);
+      return;
+  }
+
+  validacao_inputs(data_inicio_lead_element, data_fim_lead_element);
+  gerar_leadtime(data_inicio, data_fim)
+})
+
+
 
 
 
