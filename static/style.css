@@ -115,7 +115,7 @@ label {
     cursor: pointer;
 }
 
-input {
+input, select{
     width: 100%;
     padding: 10px;
     border: 1px solid #bdc3c7;
@@ -126,7 +126,11 @@ input {
     cursor:text;
 }
 
-button.csv {
+select{
+    cursor: pointer;
+}
+
+.csv {
     margin-top: 20px;
     background: #137dc4;
     color: white;
@@ -140,7 +144,7 @@ button.csv {
     width: 100%;
 }
 
-button.csv:hover {
+.csv:hover {
     background: #4b9fd6;
 }
 
